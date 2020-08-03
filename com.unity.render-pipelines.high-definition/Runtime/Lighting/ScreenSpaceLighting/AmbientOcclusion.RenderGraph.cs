@@ -19,26 +19,26 @@ namespace UnityEngine.Rendering.HighDefinition
             // So we can't rely on automatic pass stripping. This is why we have to be explicit here.
             if (IsActive(hdCamera, settings))
             {
-				using (new RenderGraphProfilingScope(renderGraph, ProfilingSampler.Get(HDProfileId.AmbientOcclusion)))
-{
-                if (hdCamera.frameSettings.IsEnabled(FrameSettingsField.RayTracing) && settings.rayTracing.value)
-                    return m_RaytracingAmbientOcclusion.RenderRTAO(renderGraph, hdCamera, depthPyramid, normalBuffer, motionVectors, rayCountTexture, frameCount, shaderVariablesRaytracing);
-                else
+                using (new RenderGraphProfilingScope(renderGraph, ProfilingSampler.Get(HDProfileId.AmbientOcclusion)))
                 {
-                    var historyRT = hdCamera.GetCurrentFrameRT((int)HDCameraFrameHistoryType.AmbientOcclusion);
-                    var currentHistory = renderGraph.ImportTexture(historyRT);
-                    var outputHistory = renderGraph.ImportTexture(hdCamera.GetPreviousFrameRT((int)HDCameraFrameHistoryType.AmbientOcclusion));
+                    if (hdCamera.frameSettings.IsEnabled(FrameSettingsField.RayTracing) && settings.rayTracing.value)
+                        return m_RaytracingAmbientOcclusion.RenderRTAO(renderGraph, hdCamera, depthPyramid, normalBuffer, motionVectors, rayCountTexture, frameCount, shaderVariablesRaytracing);
+                    else
+                    {
+                        var historyRT = hdCamera.GetCurrentFrameRT((int)HDCameraFrameHistoryType.AmbientOcclusion);
+                        var currentHistory = renderGraph.ImportTexture(historyRT);
+                        var outputHistory = renderGraph.ImportTexture(hdCamera.GetPreviousFrameRT((int)HDCameraFrameHistoryType.AmbientOcclusion));
 
-                    Vector2 historySize = new Vector2(historyRT.referenceSize.x * historyRT.scaleFactor.x,
-                                  historyRT.referenceSize.y * historyRT.scaleFactor.y);
-                    var rtScaleForHistory = hdCamera.historyRTHandleProperties.rtHandleScale;
+                        Vector2 historySize = new Vector2(historyRT.referenceSize.x * historyRT.scaleFactor.x,
+                                      historyRT.referenceSize.y * historyRT.scaleFactor.y);
+                        var rtScaleForHistory = hdCamera.historyRTHandleProperties.rtHandleScale;
 
-                    var aoParameters = PrepareRenderAOParameters(hdCamera, historySize * rtScaleForHistory, frameCount, depthMipInfo);
+                        var aoParameters = PrepareRenderAOParameters(hdCamera, historySize * rtScaleForHistory, frameCount, depthMipInfo);
 
-                    var packedData = RenderAO(renderGraph, aoParameters, depthPyramid, normalBuffer);
-                    result = DenoiseAO(renderGraph, aoParameters, depthPyramid, motionVectors, packedData, currentHistory, outputHistory);
+                        var packedData = RenderAO(renderGraph, aoParameters, depthPyramid, normalBuffer);
+                        result = DenoiseAO(renderGraph, aoParameters, depthPyramid, motionVectors, packedData, currentHistory, outputHistory);
+                    }
                 }
-}
             }
             else
             {
