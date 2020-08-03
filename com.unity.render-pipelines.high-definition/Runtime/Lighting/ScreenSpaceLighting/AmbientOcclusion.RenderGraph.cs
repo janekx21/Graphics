@@ -19,14 +19,12 @@ namespace UnityEngine.Rendering.HighDefinition
             // So we can't rely on automatic pass stripping. This is why we have to be explicit here.
             if (IsActive(hdCamera, settings))
             {
-                // Size must be checked independently of what version should be used
-                EnsureRTSize(settings, hdCamera);
-
+				using (new RenderGraphProfilingScope(renderGraph, ProfilingSampler.Get(HDProfileId.AmbientOcclusion)))
+{
                 if (hdCamera.frameSettings.IsEnabled(FrameSettingsField.RayTracing) && settings.rayTracing.value)
                     return m_RaytracingAmbientOcclusion.RenderRTAO(renderGraph, hdCamera, depthPyramid, normalBuffer, motionVectors, rayCountTexture, frameCount, shaderVariablesRaytracing);
                 else
                 {
-
                     var historyRT = hdCamera.GetCurrentFrameRT((int)HDCameraFrameHistoryType.AmbientOcclusion);
                     var currentHistory = renderGraph.ImportTexture(historyRT);
                     var outputHistory = renderGraph.ImportTexture(hdCamera.GetPreviousFrameRT((int)HDCameraFrameHistoryType.AmbientOcclusion));
@@ -40,6 +38,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     var packedData = RenderAO(renderGraph, aoParameters, depthPyramid, normalBuffer);
                     result = DenoiseAO(renderGraph, aoParameters, depthPyramid, motionVectors, packedData, currentHistory, outputHistory);
                 }
+}
             }
             else
             {
