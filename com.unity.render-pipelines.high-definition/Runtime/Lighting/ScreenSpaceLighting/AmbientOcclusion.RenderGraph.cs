@@ -25,6 +25,8 @@ namespace UnityEngine.Rendering.HighDefinition
                         return m_RaytracingAmbientOcclusion.RenderRTAO(renderGraph, hdCamera, depthPyramid, normalBuffer, motionVectors, rayCountTexture, frameCount, shaderVariablesRaytracing);
                     else
                     {
+                        EnsureRTSize(settings, hdCamera);
+
                         var historyRT = hdCamera.GetCurrentFrameRT((int)HDCameraFrameHistoryType.AmbientOcclusion);
                         var currentHistory = renderGraph.ImportTexture(historyRT);
                         var outputHistory = renderGraph.ImportTexture(hdCamera.GetPreviousFrameRT((int)HDCameraFrameHistoryType.AmbientOcclusion));
